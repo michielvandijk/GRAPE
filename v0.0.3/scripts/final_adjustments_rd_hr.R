@@ -211,3 +211,94 @@ table(hr_rd_db$source)
 n_distinct(hr_rd_db$source)
 try(if(any(is.na(hr_rd_db$source))) stop("NA values"))
 
+
+
+
+# ========================================================================================
+# FINALIZE AND SAVE ----------------------------------------------------------------------
+# ========================================================================================
+
+grape_db <- hr_rd_db |>
+  mutate(country = countrycode(iso3c, "iso3c", "country.name"),
+         variable = toupper(variable),
+         unit = ifelse(variable == "HR", "FTE", glue("million {by} PPP$"))) |>
+  rename(pre_processing = processing) |>
+  arrange(iso3c, variable, year) |>
+  dplyr::select(country, iso3c, year, variable, unit, source, pre_processing, linking, value)
+
+# Add documentation
+var_grape_db <- data.frame(
+  variable = names(grape_db),
+  description = c(
+    "Country name",
+    "ISO three letter code",
+    "Year of data",
+    glue("Variable: HR - Number of public agricultural researchers (FTE), RD - Public agricultural R&D expenditures (million {by} PPP$)"),
+    "Unit of variable",
+    "Source of data, see GRAPE documentation for full references",
+    "Code for data linking and imputation approaches, see GRAPE documentation for more information",
+    "Code for quality control adjustments and treatment of missing data, see GRAPE documentation for more information",
+    "Value")
+)
+
+# Set worksheet contents
+ws_grape_db <- list("grape_db" = grape_db,
+                    "var_grape_db" = var_grape_db)
+
+
+# Create database folder
+temp_path <- "c:/temp/grape_db"
+dir.create(temp_path, showWarnings = FALSE, recursive = TRUE)
+
+# Save
+write.xlsx(ws_grape_db, file.path(temp_path, glue("grape_db_{db_version}.xlsx")))
+
+
+# ========================================================================================
+# CREATE CONSTANT LCU AND US$ DB ---------------------------------------------------------
+# ========================================================================================
+
+# Missing xr and ppp
+setdiff(unique(grape_db$iso3c), unique(xr_by_db$iso3c))
+setdiff(unique(grape_db$iso3c), unique(ppp_by_db$iso3c))
+
+# Prepare usd and con lcu
+rd_db <- grape_db |>
+  filter(variable == "RD") |>
+  left_join(ppp_by_db |>
+              dplyr::select(iso3c, usd_ppp)) |>
+  left_join(xr_by_db |>
+              dplyr::select(iso3c, usd_lcu_xr)) |>
+  mutate(rd_con_lcu = value * usd_ppp,
+         rd_con_usd = rd_con_lcu/usd_lcu_xr,
+         lcu = countrycode(iso3c, "iso3c", "currency")) |>
+  dplyr::select(country, iso3c, year, rd_ppp_usd = value, rd_con_usd, rd_con_lcu, lcu)
+
+# Add documentation
+var_rd_db <- data.frame(
+  variable = names(rd_db),
+  description = c(
+    "Country name",
+    "ISO three letter code",
+    "Year of data",
+    glue("Public agricultural R&D expenditures in {by} PPP$, identical to main GRAPE data file"),
+    glue("Public agricultural R&D expenditures in {by} constant US$"),
+    glue("Public agricultural R&D expenditures in {by} constant local currency unit"),
+    "local currency unit")
+)
+
+# Set worksheet contents
+ws_rd_db <- list("rd_db" = rd_db,
+                 "var_rd_db" = var_rd_db)
+
+# Save
+write.xlsx(ws_rd_db, file.path(temp_path, glue("rd_db_{db_version}.xlsx")))
+
+
+
+
+
+
+
+
+
