@@ -1,0 +1,19 @@
+number,linking,description,description_long
+1,none,No linking,No linking of data.
+2,splice_new,Spliced with newer data,Data was spliced together with more recent data series applying the growth rate for overlapping years.
+3,splice_old,Spliced with older data,Data was spliced together with older data series  applying the growth rate for overlapping years.
+4,i_mul,Multiple imputation,
+5,fc,Forecast,
+6,li,Linear growth interpolation,
+7,si,Spline interpolation,
+8,ei,Exponential growth interpolation,Interpolation of missing values using a constant exponential growth rate between two years.
+9,i_aggdp,AGGDP imputation,
+10,i_hr,HR imputation,
+11,i_rd,RD imputation,
+12,i_gbard,GBARD imputation,
+13,i_naive,Naive imputation,"Imputation using naive forecasting, i.e. carry the last observation forward."
+14,i_dt,DF forecast,
+15,i_ses,SES forecast,
+16,i_ens,Ensemble imputation,Imputation using an ensemble of imputed values - see GRAPE documentation for details.
+17,i_man,Manual imputation,Manual adjustment of imputed values - see GRAPE country documentation for details.
+18,i_agoutput,AGOUTPUT imputation,
