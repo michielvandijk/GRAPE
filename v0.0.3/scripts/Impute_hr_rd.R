@@ -55,7 +55,7 @@ macro_db <- read_excel(file.path(db_path, glue("macro_db_{macro_db_version}.xlsx
 
 # Linking
 li <- read.csv(here(glue("{db_version}/data/linking_list.csv")))
-pr <- read.csv(here(glue("{db_version}/data/processing_list.csv")))
+
 
 
 # ========================================================================================
@@ -367,6 +367,6 @@ n_distinct(imp_db$iso3c)
 
 rm(aggdp_imp_db, agoutput_imp_db, check_series, dt_ses_imp_db, dt_ses_iso3c, hr_imp_db, hr_pre_imp, hr_rd_min_data,
    hr_rd_imp_db, hr_rd_pre_imp, imp_db, imp_hr_db, imp_rd_db, imp_rd_mean_db, interpolation_db, li,
-   macro_db, min_year, naive_imp_db, pr, rd_pre_imp)
+   macro_db, min_year, naive_imp_db, rd_pre_imp)
 
 

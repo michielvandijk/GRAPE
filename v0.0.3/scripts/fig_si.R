@@ -58,7 +58,6 @@ macro_db <- read_excel(file.path(db_path, glue("macro_db_{macro_db_version}.xlsx
 
 # Linking
 li <- read.csv(here(glue("{db_version}/data/linking_list.csv")))
-pr <- read_csv(here(glue("{db_version}/data/processing_list.csv")))
 
 
 # ========================================================================================

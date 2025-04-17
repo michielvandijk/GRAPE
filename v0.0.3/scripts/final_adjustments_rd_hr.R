@@ -49,9 +49,6 @@ li <- read.csv(here(glue("{db_version}/data/linking_list.csv")))
 so <- read_csv(here(glue("{db_version}/data/sources_list.csv"))) |>
   select(ref_short, iso3c)
 
-# Processing list
-pr <- read_csv(here(glue("{db_version}/data/processing_list.csv")))
-
 # ppp_by_db
 ppp_by_db <- readRDS(file.path(db_path, glue("ppp_{by}_db_{macro_db_version}.rds")))
 
