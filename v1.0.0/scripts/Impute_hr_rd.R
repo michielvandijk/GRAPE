@@ -32,7 +32,7 @@ options(digits = 4)
 source(here("set_version.R"))
 
 # Set database folder
-db_path <- "C:/Users/dijk158/OneDrive - Wageningen University & Research/data/AG_RD_DB/v0.0.3/grape_db"
+db_path <- glue("c:/Users/dijk158/OneDrive - Wageningen University & Research/data/AG_RD_DB/{db_version}/grape_db")
 
 
 # ========================================================================================
@@ -326,7 +326,9 @@ imp_db <- bind_rows(
 
 imp_ensemble_db <- imp_db |>
   group_by(iso3c, year, variable) |>
-  summarize(value = mean(value, na.rm = TRUE),
+  summarize(upper = max(value, na.rm = TRUE),
+            lower = min(value, na.rm = TRUE),
+            value = mean(value, na.rm = TRUE),
             source = unique(source),
             processing = unique(processing),
             linking = paste(linking, collapse = ", "),

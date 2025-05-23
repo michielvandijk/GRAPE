@@ -32,7 +32,7 @@ options(digits = 4)
 source(here("set_version.R"))
 
 # Set database folder
-db_path <- "C:/Users/dijk158/OneDrive - Wageningen University & Research/data/AG_RD_DB/v0.0.3/grape_db"
+db_path <- glue("c:/Users/dijk158/OneDrive - Wageningen University & Research/data/AG_RD_DB/{db_version}/grape_db")
 
 
 # ========================================================================================
@@ -58,6 +58,9 @@ macro_db <- read_excel(file.path(db_path, glue("macro_db_{macro_db_version}.xlsx
 
 # Linking
 li <- read.csv(here(glue("{db_version}/data/linking_list.csv")))
+
+# Linking
+pr <- read.csv(here(glue("{db_version}/data/processing_list.csv")))
 
 
 # ========================================================================================

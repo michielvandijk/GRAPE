@@ -2,7 +2,7 @@
 
 This repository contains scripts and auxiliary data related to the
 construction of the WUR-ERS Global Research on Agriculture: Personnel &
-Expenditures database, which contains data on the number of public agricultural
+Expenditures database v1.0.0, which contains data on the number of public agricultural
 researchers and R&D expenditures for 190 countries, broadly covering the period
 1960-2022.
 

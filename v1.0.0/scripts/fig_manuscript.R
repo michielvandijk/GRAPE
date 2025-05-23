@@ -14,11 +14,11 @@ if(!require(pacman)) install.packages("pacman")
 library(pacman)
 
 # Load key packages
-p_load(here, tidyverse, readxl, stringr, scales, glue)
+p_load(here, tidyverse, readxl, scales, glue)
 
 # Load additional packages
-p_load(viridis, cowplot, sf, patchwork, ggpubr, rnaturalearth, countrycode, ggrepel,
-       slider, ggthemes)
+p_load(viridis, sf, patchwork, ggpubr, rnaturalearth, countrycode, ggrepel,
+       ggthemes)
 
 # R options
 options(scipen = 999)
@@ -33,7 +33,7 @@ options(digits = 4)
 source(here("set_version.R"))
 
 # Set database folder
-db_path <- "C:/Users/dijk158/OneDrive - Wageningen University & Research/data/AG_RD_DB/v0.0.3/grape_db"
+db_path <- glue("c:/Users/dijk158/OneDrive - Wageningen University & Research/data/AG_RD_DB/{db_version}/grape_db")
 
 
 # ========================================================================================
@@ -41,7 +41,7 @@ db_path <- "C:/Users/dijk158/OneDrive - Wageningen University & Research/data/AG
 # ========================================================================================
 
 # grape_db
-grape_db_raw <- read_excel(file.path(db_path, glue("grape_db_{db_version}.xlsx")), sheet = "grape_db")
+grape_db_raw <- read_excel(file.path(db_path, glue("grape_{db_version}.xlsx")), sheet = "grape")
 
 # Read macro db
 macro_db <- read_excel(file.path(db_path, glue("macro_db_{macro_db_version}.xlsx")), sheet = "macro_db")
@@ -336,3 +336,68 @@ fig_coverage <- grape_db_raw |>
   labs_pubr() +
   rremove("grid") +
   guides(fill = "none")
+
+
+# ========================================================================================
+# EXAMPLE --------------------------------------------------------------------------------
+# ========================================================================================
+
+example_db <- grape_db |>
+  filter(iso3c == "KOR") |>
+  arrange(variable, year) |>
+  mutate(
+    source = ifelse(source == "Imputed", linking, source),
+    class_change = source != lag(source, default = first(source)),
+    segment_id = cumsum(class_change),
+    group_id = interaction(source, segment_id, drop = TRUE)
+  )
+
+cb_palette <- c(
+  "#56B4E9", "#009E73",  "#0072B2", "#D55E00", "#999999", "#CC79A7", "#A73030", "black"
+)
+
+shapes <- c(1, 4, 8, 16, 17, 9, 19, 0, 3, 10, 12)
+sources <- unique(example_db$source)
+
+fixed_color <- "#E69F00"
+names(fixed_color) <- "i_ens"
+fixed_shape <- 15
+names(fixed_shape) <- "i_ens"
+other_sources <- setdiff(sources, "i_ens")
+other_colors <- cb_palette[seq_along(other_sources)]
+names(other_colors) <- other_sources
+other_shapes <- setdiff(sources, "I_ens")
+other_shapes <- shapes[seq_along(other_shapes)]
+names(other_shapes) <- other_sources
+color_map <- c(fixed_color, other_colors)
+shape_map <- c(fixed_shape, other_shapes)
+
+fig_example <- example_db |>
+  mutate(variable2 = ifelse(variable == "RD", "R&D expenditures (million 2017 PPP$)", "Number of researchers (FTE)")) |>
+  ggplot(aes(x = year, y = value)) +
+  facet_grid(rows = vars(variable2), switch = "y", scales = "free") +
+  geom_point(aes(color = source, shape = source), size = 2) +
+  geom_ribbon(aes(ymin = lower,
+                  ymax = upper,
+                  fill = source,
+                  group = group_id), alpha=0.25,
+              show.legend = FALSE) +
+  scale_shape_manual(values = shape_map) +
+  scale_fill_manual(values = color_map) +
+  scale_color_manual(values = color_map) +
+  geom_line(aes(y = value), color = "black") +
+  scale_x_continuous(breaks = pretty_breaks()) +
+  scale_y_continuous(labels = comma, breaks = pretty_breaks()) +
+  theme(
+    legend.position = "bottom",
+    legend.direction = "horizontal"
+  ) +
+  theme_bw() +
+  theme(
+    strip.placement = "outside",
+    strip.background = element_blank()
+  ) +
+  labs(color = NULL, shape = NULL, fill = NULL, x = NULL, y = NULL) +
+  labs_pubr() +
+  rremove("grid")
+

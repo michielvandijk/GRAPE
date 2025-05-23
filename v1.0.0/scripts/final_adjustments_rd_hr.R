@@ -32,7 +32,7 @@ options(digits = 4)
 source(here("set_version.R"))
 
 # Set database folder
-db_path <- "C:/Users/dijk158/OneDrive - Wageningen University & Research/data/AG_RD_DB/v0.0.3/grape_db"
+db_path <- glue("c:/Users/dijk158/OneDrive - Wageningen University & Research/data/AG_RD_DB/{db_version}/grape_db")
 
 
 # ========================================================================================
@@ -120,7 +120,8 @@ hr_rd_db <- imp_ensemble_db
 # SOLOMON ISLANDS (SLB) ------------------------------------------------------------------
 
 # We impute up to 2001 (lowest point) and assume R&D spending stays constant onwards because of impact of conflict and
-# destruction of research facilities
+# destruction of research facilities.
+# We set the lower and upper equal to the imputed value
 plot_source_info ("SLB", hr_rd_db)
 
 SLB <- bind_rows(
@@ -128,12 +129,16 @@ SLB <- bind_rows(
     filter(iso3c == "SLB", variable == "rd") |>
     mutate(value = ifelse(year > 2001, NA_real_, value),
            value = na_locf(value),
+           upper = ifelse(year > 2001, value, upper),
+           lower = ifelse(year > 2001, value, lower),
            linking = ifelse(year > 2001, li$linking[17], linking)),
   hr_rd_db |>
     filter(iso3c == "SLB", variable == "hr") |>
     mutate(value = ifelse(year > 2001, NA_real_, value),
            value = na_locf(value),
-           linking = ifelse(year > 2001, li$linking[13], linking))
+           upper = ifelse(year > 2001, value, upper),
+           lower = ifelse(year > 2001, value, lower),
+           linking = ifelse(year > 2001, li$linking[17], linking))
 )
 
 plot_source_info ("SLB", SLB)
@@ -154,9 +159,13 @@ plot_source_info ("MSR", hr_rd_db)
 
 MSR <- hr_rd_db |>
   filter(iso3c == "MSR") |>
-  mutate(value = ifelse(source == "Imputed", NA_real_, value)) |>
+  mutate(value = ifelse(source == "Imputed", NA_real_, value),
+         upper = ifelse(source == "Imputed", NA_real_, value),
+         lower = ifelse(source == "Imputed", NA_real_, value)) |>
   group_by(iso3c, variable) |>
   mutate(value = na_locf(value),
+         upper = na_locf(upper),
+         lower = na_locf(lower),
          linking = ifelse(source == "Imputed", li$linking[13], linking))
 
 plot_source_info ("MSR", MSR)
@@ -167,6 +176,7 @@ hr_rd_db <- bind_rows(
   MSR
 )
 rm(MSR)
+
 
 # ========================================================================================
 # CHECKS ---------------------------------------------------------------------------------
@@ -209,8 +219,6 @@ n_distinct(hr_rd_db$source)
 try(if(any(is.na(hr_rd_db$source))) stop("NA values"))
 
 
-
-
 # ========================================================================================
 # FINALIZE AND SAVE ----------------------------------------------------------------------
 # ========================================================================================
@@ -221,7 +229,7 @@ grape_db <- hr_rd_db |>
          unit = ifelse(variable == "HR", "FTE", glue("million {by} PPP$"))) |>
   rename(pre_processing = processing) |>
   arrange(iso3c, variable, year) |>
-  dplyr::select(country, iso3c, year, variable, unit, source, pre_processing, linking, value)
+  dplyr::select(country, iso3c, year, variable, unit, source, pre_processing, linking, value, lower, upper)
 
 # Add documentation
 var_grape_db <- data.frame(
@@ -235,20 +243,22 @@ var_grape_db <- data.frame(
     "Source of data, see GRAPE documentation for full references",
     "Code for data linking and imputation approaches, see GRAPE documentation for more information",
     "Code for quality control adjustments and treatment of missing data, see GRAPE documentation for more information",
-    "Value")
+    "Value",
+    "Lower bound in case of ensemble imputation (i_ens)",
+    "Upper bound in case of ensemble imputation (i_ens)")
 )
 
 # Set worksheet contents
-ws_grape_db <- list("grape_db" = grape_db,
-                    "var_grape_db" = var_grape_db)
+ws_grape_db <- list("grape" = grape_db,
+                    "var_grape" = var_grape_db)
 
 
 # Create database folder
-temp_path <- "c:/temp/grape_db"
+temp_path <- file.path(db_path, "database_test")
 dir.create(temp_path, showWarnings = FALSE, recursive = TRUE)
 
 # Save
-write.xlsx(ws_grape_db, file.path(temp_path, glue("grape_db_{db_version}.xlsx")))
+write.xlsx(ws_grape_db, file.path(temp_path, glue("grape_{db_version}.xlsx")))
 
 
 # ========================================================================================
@@ -278,23 +288,18 @@ var_rd_db <- data.frame(
     "Country name",
     "ISO three letter code",
     "Year of data",
-    glue("Public agricultural R&D expenditures in {by} PPP$, identical to main GRAPE data file"),
-    glue("Public agricultural R&D expenditures in {by} constant US$"),
-    glue("Public agricultural R&D expenditures in {by} constant local currency unit"),
+    glue("Public agricultural R&D expenditures in million {by} PPP$, identical to main GRAPE data file"),
+    glue("Public agricultural R&D expenditures in million {by} constant US$"),
+    glue("Public agricultural R&D expenditures in million {by} constant local currency unit"),
     "local currency unit")
 )
 
 # Set worksheet contents
-ws_rd_db <- list("rd_db" = rd_db,
-                 "var_rd_db" = var_rd_db)
+ws_rd_db <- list("rd" = rd_db,
+                 "var_rd" = var_rd_db)
 
 # Save
-write.xlsx(ws_rd_db, file.path(temp_path, glue("rd_db_{db_version}.xlsx")))
-
-
-
-
-
+write.xlsx(ws_rd_db, file.path(temp_path, glue("rd_{db_version}.xlsx")))
 
 
 
