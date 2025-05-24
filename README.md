@@ -10,7 +10,7 @@ More information on GRAPE is provided in this paper:
 
 Van Dijk, M. et al. (2025), A global database of public agricultural R&D investment: 1960-2022, https://doi.org/10.21203/rs.3.rs-6463998/v1
 
-The GRAPE database is stored in a Zenodo repository: https://doi.org/10.5281/zenodo.15081424.
+The GRAPE database is stored in a Zenodo repository: https://zenodo.org/records/15507361.
 
 The repository contains a in folder that refers to the version of the GRAPE database, which includes two subfolders:
 
