@@ -8,7 +8,7 @@ researchers and R&D expenditures for 190 countries, broadly covering the period
 
 More information on GRAPE is provided in this paper: 
 
-Van Dijk, M. et al. (2025), A global database of public agricultural R&D investment: 1960-2022, https://doi.org/10.21203/rs.3.rs-6463998/v1
+Van Dijk, M. et al. (2025), A global database of public agricultural R&D investment: 1960-2022, https://doi.org/10.1038/s41597-025-05331-y
 
 The GRAPE database is stored in a Zenodo repository: https://zenodo.org/records/15507361.
 

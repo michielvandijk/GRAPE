@@ -233,8 +233,8 @@ rm(ag_output_iso3c)
 # FORECAST USING DT AND SES --------------------------------------------------------------
 # ========================================================================================
 
-# Only apply this for countries with (a) available data = 20, not imputed
-# and (b) max 7 missing
+# Only apply this for countries with (a) available data is smaller or equal to 24, not imputed,
+# and (b) max 6 missing
 dt_ses_iso3c <-  interpolation_db |>
   group_by(iso3c, variable) |>
   filter(year > ey-30) |>
